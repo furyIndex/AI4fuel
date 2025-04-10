@@ -1,5 +1,4 @@
 from torch.utils.data import Dataset
-from prepare import prepare_data
 import numpy as np
 import pandas as pd
 
@@ -16,9 +15,4 @@ class testDataset(Dataset):
     def __len__(self):
         return len(self.labels)
 
-
-if __name__ == '__main__':
-    dataset = testDataset()
-    print(dataset.__len__())
-    print(dataset.__getitem__(1))
 
