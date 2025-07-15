@@ -1,0 +1,5 @@
+File: ../data/other/TB.xlsx
+Best Value: 0.8616335988044739
+Best Params: {'learning_rate': 0.0027988706072276746, 'batch_size': 256, 'dim_feedforward': 512, 'num_heads': 2, 'num_layers': 1, 'hidden_size_1': 128, 'hidden_size_2': 1024, 'hidden_size_3': 256}
+Best epoch: 317
+----------------

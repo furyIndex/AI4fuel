@@ -1,0 +1,4 @@
+File: ../data/other/DCN.xlsx
+Best Value: 0.8812220692634583
+Best Params: {'learning_rate': 0.001304463222237207, 'batch_size': 128, 'dim_feedforward': 2048, 'num_heads': 2, 'num_layers': 1, 'hidden_size_1': 64, 'hidden_size_2': 1024, 'hidden_size_3': 256, 'epochs': 260}
+----------------

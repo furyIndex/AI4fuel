@@ -1,0 +1,7 @@
+
+upython:S117-"WRename this local variable "full_A" to match the regular expression ^[_a-z][a-z0-9_]*$.(äÊÃñ8éƒ”é€3
+upython:S117""XRename this local variable "train_A" to match the regular expression ^[_a-z][a-z0-9_]*$.(˜Þð;8éƒ”é€3
+xpython:S1542H"TRename function "splitTrainTest" to match the regular expression ^[a-z_][a-z0-9_]*$.(…¨Æùûÿÿÿÿ8¦«Ÿé€3
+kpython:S117i"MRename this parameter "X" to match the regular expression ^[_a-z][a-z0-9_]*$.(Ü‚ç8§«Ÿé€3
+zpython:S117Ž"[Rename this local variable "D_inv_sqrt" to match the regular expression ^[_a-z][a-z0-9_]*$.(§ò‚±8§«Ÿé€3
+>python:S125¸"Remove this commented out code.(ÿÌþõ8§«Ÿé€3

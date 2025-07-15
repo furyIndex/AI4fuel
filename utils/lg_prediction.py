@@ -28,8 +28,8 @@ def load_x_train(file_path):
     x_train = loaded_data["x_train"]
     descriptor_name = loaded_data["descriptor_name"]
 
-    print("加载数据x_train：", x_train.shape)
-    print("加载数据描述符个数：", len(descriptor_name))
+    print("Load data x_train：", x_train.shape)
+    print("Number of data descriptors loaded：", len(descriptor_name))
     return x_train, descriptor_name
 
 
@@ -39,48 +39,40 @@ def load_train_A(file_path):
     train_A = loaded_data["train_A"]
     train_degree = loaded_data["train_degree"]
 
-    print("加载train_A: ", train_A.shape)
-    print("加载train_degree: ", train_degree.shape)
+    print("Load data x_train: ", train_A.shape)
+    print("Load data train_degree: ", train_degree.shape)
     return train_A, train_degree
 
 def load_train_embedding(file_path):
     with open(file_path, "rb") as f:
         loaded_data = pickle.load(f)
     train_embedding = loaded_data["train_embedding"]
-    print("加载train_embedding: ", train_embedding.shape)
+    print("load data train_embedding: ", train_embedding.shape)
     return train_embedding
 
 
 
 
-'''
-批量获取共同有效的描述符写入文件
-'''
+
 def calculate_descriptors(file_path, smiles_list, descriptor_name):
 
     result = []
     for smiles in smiles_list:
         if smiles is None or smiles == "" or smiles == " ":
             continue
-        # 读取分子结构
+
         molecule = Chem.MolFromSmiles(smiles)
         molecule = Chem.AddHs(molecule)
 
-        # 为分子生成三维构象
         if molecule.GetNumConformers() == 0:
             AllChem.EmbedMolecule(molecule, AllChem.ETKDG())
             AllChem.UFFOptimizeMolecule(molecule)
-
-        # 检查分子是否有效
         if molecule is None or molecule.GetNumAtoms() == 0:
-            raise ValueError("无效的分子结构")
-
-
+            raise ValueError("Invalid molecular structure")
         if molecule.GetNumConformers() > 0:
             calculator = Calculator(descriptors, ignore_3D=False)
             results = calculator(molecule)
             mol_values = []
-            # 保存该化合物的有效描述符的值
             for key in descriptor_name:
                 desc_value = results[key]
                 if type(desc_value) is Missing:
@@ -91,35 +83,32 @@ def calculate_descriptors(file_path, smiles_list, descriptor_name):
             result.append(mol_values)
 
     result = np.array(result)
-    print("描述符计算完成。")
-    print("描述符shape：", result.shape)
-
+    print("Descriptor calculation completed。")
     return result
 
 
 
 def get_descriptors_from_pkl(smiles_list, descriptor_name):
-    # 加载所有smiles的所有描述符字典
+
     with open("../result/all_descriptors.pkl", "rb") as f:
         loaded_data = pickle.load(f)
     smiles_descriptors = loaded_data["descriptors_dict"]
 
     result = []
     i = 1
-    print("================获取描述符==================")
+    print("================Get descriptors==================")
     for smiles in smiles_list:
         print(i)
         mol_descriptors = []
-        # 获取当前smiles的描述符字典
+
         descriptors_dict = smiles_descriptors[smiles]
-        # 依次获取对应描述符值
+
         for descriptor in descriptor_name:
             mol_descriptors.append(descriptors_dict[descriptor])
         result.append(mol_descriptors)
         i += 1
 
     result = np.array(result)
-    print("最后描述符结果的shape：", result.shape)
     return result
 
 
@@ -130,7 +119,6 @@ def get_descriptors_from_pkl(smiles_list, descriptor_name):
 def get_lg_gcn_embedding(x_train, train_embedding,  train_A, train_degree, x_test, model):
 
 
-    # 标准化特征
     scaler = StandardScaler()
     x_train = scaler.fit_transform(x_train)
     x_test = scaler.transform(x_test)
@@ -139,52 +127,40 @@ def get_lg_gcn_embedding(x_train, train_embedding,  train_A, train_degree, x_tes
     test_length = len(x_test)
     full_length = len(x_full)
 
-    # embedding
     test_input = torch.tensor(x_test).float().to(device)
     test_embedding = model(test_input)
     test_embedding = test_embedding.cpu().detach().numpy()
 
-    # 获取相似性矩阵
     test_similarity_matrix = np.dot(test_embedding, train_embedding.T)
 
-
-    # 测试数据knn稀疏化
     test_block = knn_val(test_similarity_matrix, test_length, full_length, 10)
-    # 合并邻接矩阵
+
     train_block = np.hstack([train_A, np.zeros((train_length, test_length))])
     full_adj = np.vstack([train_block, test_block])
 
-    # 测试数据连接训练数据
+
     full_A = norm_adj_val(full_adj, train_degree, 0.1)
     full_matrix = np.dot(full_A, x_full)
     test_gcn_matrix = full_matrix[-test_length:]
 
-    # 拼接融合后的特征
+
     pre_group_df = pd.DataFrame(test_gcn_matrix, columns=descriptor_name)
 
-    # 计算每个分类下的最多数列X
     max_columns = max(len(descriptors) for descriptors in descriptorsMapping.values())
-    # 初始化一个空的DataFrame来存储结果
     result_df = pd.DataFrame()
 
-    # 根据描述符类型分类合并
+
     for type, descriptors in descriptorsMapping.items():
         exist_df = [descriptor for descriptor in descriptors if descriptor in pre_group_df.columns]
         if exist_df:
-            # 提取存在的描述符列
             group_df = pre_group_df[exist_df]
-            # 将每个分类对应的列值修改成长度为max_columns的列表，不足的位上补0
             padded_values = group_df.apply(lambda x: x.tolist() + [0] * (max_columns - len(x)), axis=1)
-            # 将处理后的数据添加到结果DataFrame中
             result_df[type] = padded_values
-    print("特征融合后的结果df： ")
-    print(result_df.shape)
 
     tensor_data = df_to_tensor(result_df)
     tensor_data = tensor_data.to(device)
 
     print(tensor_data.shape)
-
     return tensor_data
 
 
@@ -192,17 +168,13 @@ def get_lg_gcn_embedding(x_train, train_embedding,  train_A, train_degree, x_tes
 
 
 def df_to_tensor(df):
-    # 提取数据并转换为三维 NumPy 数组
+
     samples = []
     for _, row in df.iterrows():
-        # 将每一行的所有列表（每个分类的数据）转换为二维数组
-        row_data = np.array(row.tolist())  # 形状：(n_types, max_columns)
+        row_data = np.array(row.tolist())
         samples.append(row_data)
+    data_np = np.stack(samples)
 
-    # 堆叠所有样本，形成三维数组
-    data_np = np.stack(samples)  # 形状：(n_samples, n_types, max_columns)
-
-    # 转换为 PyTorch 张量
     tensor_data = torch.tensor(data_np, dtype=torch.float32)
     return tensor_data
 
@@ -211,7 +183,7 @@ def df_to_tensor(df):
 
 
 if __name__ == '__main__':
-    with open('D:\\code\\PyCharm_WorkSpace\\ai4fuel\\descriptors_group\\descriptorsMap\\descriptorsMapping.json', 'r') as f:
+    with open('../descriptors_group/descriptorsMap/descriptorsMapping.json', 'r') as f:
         descriptorsMapping = json.load(f)
 
     embedding_dict = {
@@ -260,14 +232,14 @@ if __name__ == '__main__':
 
 
 
-    embedding_folder = "C:\\Users\\lx\\Desktop\\图表\\模型文件\\最好效果-学习图-k=10_a=0.1\\embedding模型\\"
-    predict_model_path = "C:\\Users\\lx\\Desktop\\图表\\模型文件\\最好效果-学习图-k=10_a=0.1\\gcn-transformer\\模型\\"
-    all_data_file = "C:\\Users\\lx\\Desktop\\网站构建信息\\所有预测数据.xlsx"
+    embedding_folder = "../save_models_server"
+    predict_model_path = "../save_models_server"
+    all_data_file = "../data/all_data/all_fuel_data.xlsx"
     all_df = pd.read_excel(all_data_file, sheet_name="all_data")
 
     for property, embedding_name in embedding_dict.items():
         print("======================={}=======================".format(property))
-        # embedding网络
+
         embedding_path = embedding_folder + embedding_name
         embedding_model = load_model(embedding_path)
         embedding_model = embedding_model.to(device)
@@ -281,19 +253,19 @@ if __name__ == '__main__':
         train_embedding = load_train_embedding(train_embedding_path)
 
         smiles_list = all_df[all_df["{}_pre".format(property)].isna()]["SMILES"].tolist()
-        print("待预测的smiles数量：", len(smiles_list))
+        print("Number of smiles to be predicted：", len(smiles_list))
 
-        # 计算描述符
+
         # test_descriptors = calculate_descriptors(all_data_file, smiles_list, descriptor_name)
         test_descriptors = get_descriptors_from_pkl(smiles_list, descriptor_name)
 
-        # gcn特征融合
+
         input_data = get_lg_gcn_embedding(x_train, train_embedding, train_A, train_degree, test_descriptors, embedding_model)
 
 
         
 
-        # 预测
+
         model = predict_model_dict[property]
         model_path = predict_model_path + model
 
@@ -302,7 +274,7 @@ if __name__ == '__main__':
         prediction = predict_model(input_data)
         prediction = prediction.cpu().detach().numpy()
         prediction = np.squeeze(prediction)
-        print("=======================预测完成===========================")
+        print("=======================Prediction completed===========================")
         print(prediction.shape)
         print(prediction)
 
@@ -310,6 +282,5 @@ if __name__ == '__main__':
         all_df["{}_pre".format(property)] = all_df['SMILES'].map(result_dict)
 
     with pd.ExcelWriter(all_data_file, engine='openpyxl', mode='a') as writer:
-        # 如果文件不存在，mode='w' 会创建一个新文件，mode='a' 表示追加模式
-        # 将 DataFrame 写入名为 'Sheet3' 的工作表，如果工作表已存在，将覆盖它
+
         all_df.to_excel(writer, sheet_name="all_predict_data", index=False)

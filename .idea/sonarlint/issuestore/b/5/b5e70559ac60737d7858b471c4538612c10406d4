@@ -1,0 +1,6 @@
+
+ppython:S1542"SRename function "split_LG_Data" to match the regular expression ^[a-z_][a-z0-9_]*$.(Â‰á¡ûÿÿÿÿ
+gpython:S117("QRename this parameter "myNet" to match the regular expression ^[_a-z][a-z0-9_]*$.(“°ÌZ
+epython:S1542:"MRename function "showFig" to match the regular expression ^[a-z_][a-z0-9_]*$.(Åé¨
+epython:S1542`"NRename function "showFig2" to match the regular expression ^[a-z_][a-z0-9_]*$.(³¡õP
+ppython:S1542…"RRename function "showTruePred" to match the regular expression ^[a-z_][a-z0-9_]*$.(ßİŠıÿÿÿÿ

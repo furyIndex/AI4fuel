@@ -1,0 +1,8 @@
+
+{python:S117'"XRename this local variable "train_A" to match the regular expression ^[_a-z][a-z0-9_]*$.(Ë£“Àúÿÿÿÿ8ş‚á2
+vpython:S1542$"RRename function "load_train_A" to match the regular expression ^[a-z_][a-z0-9_]*$.(Å°õÒúÿÿÿÿ8ş‚á2
+Upython:S11729"1Remove the unused function parameter "file_path".(‰ÔÍ˜üÿÿÿÿ8ş‚á2
+xpython:S37769"TRefactor this function to reduce its Cognitive Complexity from 19 to the 15 allowed.(‰ÔÍ˜üÿÿÿÿ8ş‚á2
+{python:S117"WRename this local variable "full_A" to match the regular expression ^[_a-z][a-z0-9_]*$.(¿ş·Áûÿÿÿÿ8ş‚á2
+vpython:S117w"SRename this parameter "train_A" to match the regular expression ^[_a-z][a-z0-9_]*$.(Ÿ£×§ÿÿÿÿÿ8ş‚á2
+>python:S125ƒ"Remove this commented out code.(“øÇ8‡‡¹ê€3

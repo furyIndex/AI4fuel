@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="b8225335-0177-4cf3-8af6-15f6692594a2" name="lab">
+        <fileTransfer rootFolder="/data/home/Lvx" accessType="SFTP" host="121.48.161.77" port="22" sshConfigId="c6621b09-67fa-43a1-a726-af3bb52b0459" sshConfig="Lvx@121.48.161.77:22 password">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" keepAliveTimeout="0" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>

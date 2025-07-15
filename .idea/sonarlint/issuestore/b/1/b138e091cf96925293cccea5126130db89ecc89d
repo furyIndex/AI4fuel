@@ -1,0 +1,8 @@
+
+Upython:S1172"1Remove the unused function parameter "file_name".(Èå¿ÿÿÿÿÿ8¾Îåİ2
+Rpython:S1481"3Remove the unused local variable "descriptor_name".(á°¥Å8Ÿ¾Îåİ2
+=python:S1250"Remove this commented out code.(à–¶…8¬ô¼ê€3
+Gpython:S11729")Remove the unused function parameter "k".(Ê¿ø8Ç¤Íåİ2
+Gpython:S11729")Remove the unused function parameter "a".(Ê¿ø8Ç¤Íåİ2
+ipython:S15429"RRename function "save_train_A" to match the regular expression ^[a-z_][a-z0-9_]*$.(Ê¿ø
+Bpython:S125K"Remove this commented out code.(‰¡òåøÿÿÿÿ8¾à½ê€3

@@ -5,23 +5,8 @@ parser = argparse.ArgumentParser()
 
 
 parser.add_argument('--device', type=str, default="cuda:0", help='device')
-# parser.add_argument('--device', type=str, default="cpu", help='device')
 
-# =================MLP args=====================#
-# parser.add_argument('--data_path', type=str,
-#                     default="D:\\code\\PyCharm_WorkSpace\\ai4fuel\\data\\hovDescriptors.xlsx",
-#                     help='input data path')
-# parser.add_argument('--data_dim', type=int, default=1288, help='data dim')
-# parser.add_argument('--input_dim', type=int, default=1288, help='nn input dim')
-# parser.add_argument('--preHandle_data_normalization', type=int, default=1, help='preHandle data normalization')
-# parser.add_argument('--dim_1', type=int, default=557, help='dim_1')
-# parser.add_argument('--dim_2', type=int, default=281, help='dim_2')
-# parser.add_argument('--batch_size', type=int, default=249, help='input batch size for training')
-# parser.add_argument('--epochs', type=int, default=415, help='number of epochs to train')
-# parser.add_argument('--lr', type=float, default=7.111368960566379e-05, help='learning rate')
-# parser.add_argument('--dropout_rate', type=float, default=0.5, help='dropout rate')
-# parser.add_argument('--weight_decay', type=float, default=0.001, help='weight decay')
-# parser.add_argument('--k_time', type=int, default=10, help='k_time')
+
 
 # =================transformer args=====================#
 parser.add_argument('--data_path', type=str,

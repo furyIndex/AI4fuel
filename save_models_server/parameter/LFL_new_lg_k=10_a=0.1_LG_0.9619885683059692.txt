@@ -1,0 +1,5 @@
+File: ../data/other/LFL.xlsx
+Best Value: 0.9619885683059692
+Best Params: {'learning_rate': 0.00010159341257934265, 'batch_size': 64, 'dim_feedforward': 2048, 'num_heads': 1, 'num_layers': 2, 'hidden_size_1': 64, 'hidden_size_2': 1024, 'hidden_size_3': 256}
+Best epoch: 495
+----------------

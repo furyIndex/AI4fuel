@@ -1,0 +1,5 @@
+File: ../data/other/YSI.xlsx
+Best Value: 0.9903831481933594
+Best Params: {'learning_rate': 0.00034611129131949497, 'batch_size': 64, 'dim_feedforward': 512, 'num_heads': 3, 'num_layers': 2, 'hidden_size_1': 64, 'hidden_size_2': 1024, 'hidden_size_3': 256}
+Best epoch: 227
+----------------

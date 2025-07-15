@@ -1,0 +1,5 @@
+File: ../data/other/CN.xlsx
+Best Value: 0.8979709148406982
+Best Params: {'learning_rate': 0.0005830632975874823, 'batch_size': 64, 'dim_feedforward': 2048, 'num_heads': 1, 'num_layers': 2, 'hidden_size_1': 128, 'hidden_size_2': 1024, 'hidden_size_3': 128}
+Best epoch: 317
+----------------
