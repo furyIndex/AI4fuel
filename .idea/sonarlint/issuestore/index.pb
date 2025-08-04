@@ -1,22 +1,4 @@
 
-F
-train_mlp_servier.spec,e\9\e92324d07321691dc6f69af05c04bcaeed1754ad
-D
-train_transformer.py,e\d\edc4662b7ee68221e3f0f2b4908caefa7e77f33d
-O
-LRP_analysis/LRP_transformer.py,e\c\ec24f40d9feaf18c3e99df3bedd2374b2f25062a
->
-model/MyNet.py,b\0\b0d0b72b128f2bee322344d48dc56406df22a2c2
-<
-train_mlp.py,5\7\57746c8ae9277f58ea92894332733432f9d24c8e
-t
-Dtrain_servier/RON单一数据库_lg_k=10_a=0.1_0.774416983127594.txt,5\b\5b68703d1dd6498e89025ec25ece6d64fd0daba1
-@
-requirements.txt,1\9\19359a61ae2446b51b549167b014da2fcf265768
-9
-	README.md,8\e\8ec9a00bfd09b3190ac6b22251dbb1aa95a0579d
-D
-common/parse_args.py,b\c\bcf03f4566639e38445609c2fd5d53b658f39d1c
 E
 dataset/molDataset.py,8\8\884b96e573b10a08c737981fa9ff2bddb96030ed
 F
@@ -31,30 +13,8 @@ S
 #descriptors_group/getDescMapping.py,a\3\a394701b3141cdd4d75c16f7b9fe8c857cae9b8f
 V
 &descriptors_group/getGCNDescriptors.py,a\9\a9494d864ffb246561eacec212345f1182ec6e92
-P
- learned_graph/embedding_train.py,0\1\01b4e344fad2c989f80e9a5980a08013fb25f3bf
-T
-$load_model/gcn-transformer_review.py,9\c\9c59fbbfc38e56f492b0c6842a54da558edfb172
 W
 'load_model/HOV_all_attention_weights.pt,4\f\4fc63337b1bf4b53a9b64de247228815a23a8b89
-J
-load_model/loadGCNModel.py,b\5\b5e70559ac60737d7858b471c4538612c10406d4
-W
-'load_model/load_lg_transformer_model.py,a\8\a8384158764303eb32d0fe5423209cfdf6fca473
-F
-model/embedding_net.py,5\8\586fa0999fbad3ed3b55012b041e0a9c22584738
-I
-model/transformerModel.py,b\c\bcdb0641e40745f7dc795d03b15edcf358c51763
-P
- prepare/descriptorsFromSmiles.py,3\3\33959412eb689c348a941e934095f439dc00c74a
-J
-prepare/get_descriptors.py,6\b\6bdcace3c7d22433b71f6062c1632fe8923203ee
-E
-prepare/get_smiles.py,4\4\44e62ab4b7b0668176978a18bbf7f0785dd18b8e
-Z
-*descriptors_group/save_learned_gcn_data.py,3\0\30088b8e7e3c73e30c77ebe58e25d0f7e2facf50
-T
-$train_servier/learned_graph_train.py,c\0\c0c1d01dafe90e287dcf1567f5eefc22ed9aebc8
 I
 train_servier/gcn_loss.py,0\c\0c894b13611b591f6993de5718b8f4b5f2bf3703
 L

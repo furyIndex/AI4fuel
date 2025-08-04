@@ -7,7 +7,7 @@ from sklearn.preprocessing import StandardScaler
 
 from common.parse_args import args
 from descriptors_group.getGCNDescriptors import knn_train, l1_norm, norm_adj_train
-from load_model.loadGCNModel import load_model
+from load_model.load_model_utils import load_model
 
 
 device = torch.device(args.device)

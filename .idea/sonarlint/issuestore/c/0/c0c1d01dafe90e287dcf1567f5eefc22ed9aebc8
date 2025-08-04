@@ -1,7 +1,0 @@
-
-ppython:S1542"SRename function "split_LG_Data" to match the regular expression ^[a-z_][a-z0-9_]*$.(Â‰á¡ûÿÿÿÿ
-vpython:S117m"_Rename this local variable "transformModel" to match the regular expression ^[_a-z][a-z0-9_]*$.(·Èˆ
-6python:S125d"Remove this commented out code.(…òËÆ
-6python:S125x"Remove this commented out code.(àûˆÅ
-<python:S125‹"Remove this commented out code.(™ê›×ÿÿÿÿÿ
-<python:S125"Remove this commented out code.(“ªÈùûÿÿÿÿ

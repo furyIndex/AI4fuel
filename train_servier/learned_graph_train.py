@@ -1,3 +1,4 @@
+import argparse
 import ast
 import copy
 import os
@@ -11,12 +12,9 @@ from torch.utils.data import DataLoader
 
 from common.parse_args import args
 from dataset import molDataset
-from load_model.loadGCNModel import showFig, showTruePred, predict_data
+from load_model.load_model_utils import showFig, showTruePred, predict_data
 from model.transformerModel import SimpleTransformerRegressor
 import numpy as np
-
-
-device = torch.device(args.device)
 
 
 
@@ -168,29 +166,40 @@ def objective(trial):
 
 if __name__ == '__main__':
 
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--sheet_name', type=str, default='lg_k=10_a=0.1', help='fused data sheet name')
+    parser.add_argument('--n_trials', type=int, default=100, help='trials of optuna study')
+    parser.add_argument('--device', type=str, default="cuda:0", help='device')
+    args = parser.parse_args()
+
+    sheet_name = args.sheet_name
+    trials = args.n_trials
+    device = torch.device(args.device)
+
+
     data_dict = {
-        # '../data/HOV.xlsx' : 47,
-        # '../data/LHV.xlsx' : 47,
-        # '../data/RON.xlsx' : 49,
-        # '../data/MON.xlsx' : 49,
-        # '../data/CN.xlsx' : 49,
-        # '../data/YSI.xlsx' : 49,
-        # '../data/Density.xlsx' : 49,
-        # '../data/TB.xlsx' : 47,
-        # '../data/TM.xlsx' : 47,
-        # '../data/UFL.xlsx' : 47,
-        # '../data/LFL.xlsx' : 47,
-        # '../data/Viscosity.xlsx' : 47,
-        # '../data/Enthalpy_of_Vaporization.xlsx' : 47,
-        # '../data/VP.xlsx' : 47,
-        # '../data/DCN.xlsx' : 49,
-        # '../data/Surface_tension.xlsx' : 49,
-        # '../data/Flash_point.xlsx' : 47
+        '../data/HOV.xlsx' : 47,
+        '../data/LHV.xlsx' : 47,
+        '../data/RON.xlsx' : 49,
+        '../data/MON.xlsx' : 49,
+        '../data/CN.xlsx' : 49,
+        '../data/YSI.xlsx' : 49,
+        '../data/Density.xlsx' : 49,
+        '../data/TB.xlsx' : 47,
+        '../data/TM.xlsx' : 47,
+        '../data/UFL.xlsx' : 47,
+        '../data/LFL.xlsx' : 47,
+        '../data/Viscosity.xlsx' : 47,
+        '../data/Enthalpy_of_Vaporization.xlsx' : 47,
+        '../data/VP.xlsx' : 47,
+        '../data/DCN.xlsx' : 49,
+        '../data/Surface_tension.xlsx' : 49,
+        '../data/Flash_point.xlsx' : 47
 
     }
 
     optimal_results = []
-    sheet_name = 'lg_k=10_a=0.1'
 
     for file_path, seq_length in data_dict.items():
 
@@ -209,10 +218,8 @@ if __name__ == '__main__':
 
         x_train, x_test, y_train, y_test = split_LG_Data(file_path, sheet_name)
         all_data = np.vstack((x_train, x_test))
-        study.optimize(objective, n_trials=100)
+        study.optimize(objective, n_trials=trials)
 
-
-        # torch.save(best_model_state, '../save_models_server/{}_LG_{}_{}_dict.pth'.format(file_name, sheet_name, maxR2))
 
 
         best_trial = study.best_trial

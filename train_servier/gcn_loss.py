@@ -3,7 +3,7 @@ from matplotlib import pyplot as plt
 from sklearn.metrics import r2_score
 from torch.utils.data import DataLoader
 from dataset import molDataset
-from load_model.loadGCNModel import predict_data, mean_squared_error, split_LG_Data
+from load_model.load_model_utils import predict_data, mean_squared_error, split_LG_Data
 from model.transformerModel import SimpleTransformerRegressor
 
 from common.parse_args import args

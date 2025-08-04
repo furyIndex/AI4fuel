@@ -1,5 +1,0 @@
-
-lpython:S1542	"ORename function "getSmiles" to match the regular expression ^[a-z_][a-z0-9_]*$.(Þ¤Ô½þÿÿÿÿ
-qpython:S3776"TRefactor this function to reduce its Cognitive Complexity from 19 to the 15 allowed.(ÕÈßÖùÿÿÿÿ
-|python:S117?"eRename this local variable "hovDescriptorsValues" to match the regular expression ^[_a-z][a-z0-9_]*$.(íÏ—Ê
-xpython:S15429"[Rename function "saveDescriptorsValues" to match the regular expression ^[a-z_][a-z0-9_]*$.(çÐûïýÿÿÿÿ

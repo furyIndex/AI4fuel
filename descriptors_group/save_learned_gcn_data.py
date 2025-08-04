@@ -7,7 +7,7 @@ from sklearn.preprocessing import StandardScaler
 from common.parse_args import args
 from descriptors_group.getGCNDescriptors import splitTrainTest, knn_train, l1_norm, norm_adj_train, knn_val, \
     norm_adj_val
-from load_model.loadGCNModel import load_model
+from load_model.load_model_utils import load_model
 
 device = torch.device(args.device)
 
@@ -88,27 +88,26 @@ if __name__ == '__main__':
 
 
     data_dict = {
-        '../data/other/HOV.xlsx' : "HOV_embedding_2_0.5871895242769624.pth",
-        # '../data/other/LHV.xlsx' : "LHV_embedding_3_0.8772815444910687.pth",
-        # '../data/other/RON.xlsx' : "RON_embedding_1_0.3760063468414003.pth",
-        # '../data/other/MON.xlsx' : "MON_embedding_1_0.3775167319125256.pth",
-        # '../data/other/CN.xlsx' : "CN_embedding_1_0.3480172106524897.pth",
-        # '../data/other/YSI.xlsx' : "YSI_embedding_1_0.8152132600867458.pth",
-        # '../data/other/Density.xlsx' : "Density_embedding_1_0.48608576201740794.pth",
-        # '../data/other/TB.xlsx' : "TB_embedding_1_0.45683157386267037.pth",
-        # '../data/other/TM.xlsx' : "TM_embedding_3_0.526635736508536.pth",
-        # '../data/other/UFL.xlsx' : "UFL_embedding_3_0.6188434893620851.pth",
-        # '../data/other/LFL.xlsx' : "LFL_embedding_3_0.7880042580593524.pth",
-        # '../data/other/Viscosity.xlsx' : "Viscosity_embedding_1_0.7457670924015943.pth",
-        # '../data/other/Enthalpy_of_Vaporization.xlsx' : "Enthalpy_of_Vaporization_embedding_3_0.8097393628062347.pth",
-        # '../data/other/VP.xlsx' : "VP_embedding_1_0.833519575858319.pth",
-        # '../data/other/DCN.xlsx' : "DCN_embedding_3_0.5978619025504474.pth",
-        # '../data/other/Surface_tension.xlsx' : "Surface_tension_embedding_1_0.5136778129492438.pth",
-        # '../data/other/Flash_point.xlsx' : "Flash_point_embedding_1_0.4566019803325665.pth"
-
+        '../data/HOV.xlsx' : "HOV_embedding_2_0.5871895242769624.pth",
+        '../data/LHV.xlsx' : "LHV_embedding_3_0.8772815444910687.pth",
+        '../data/RON.xlsx' : "RON_embedding_1_0.3760063468414003.pth",
+        '../data/MON.xlsx' : "MON_embedding_1_0.3775167319125256.pth",
+        '../data/CN.xlsx' : "CN_embedding_1_0.3480172106524897.pth",
+        '../data/YSI.xlsx' : "YSI_embedding_1_0.8152132600867458.pth",
+        '../data/Density.xlsx' : "Density_embedding_1_0.48608576201740794.pth",
+        '../data/TB.xlsx' : "TB_embedding_1_0.45683157386267037.pth",
+        '../data/TM.xlsx' : "TM_embedding_3_0.526635736508536.pth",
+        '../data/UFL.xlsx' : "UFL_embedding_3_0.6188434893620851.pth",
+        '../data/LFL.xlsx' : "LFL_embedding_3_0.7880042580593524.pth",
+        '../data/Viscosity.xlsx' : "Viscosity_embedding_1_0.7457670924015943.pth",
+        '../data/Enthalpy_of_Vaporization.xlsx' : "Enthalpy_of_Vaporization_embedding_3_0.8097393628062347.pth",
+        '../data/VP.xlsx' : "VP_embedding_1_0.833519575858319.pth",
+        '../data/DCN.xlsx' : "DCN_embedding_3_0.5978619025504474.pth",
+        '../data/Surface_tension.xlsx' : "Surface_tension_embedding_1_0.5136778129492438.pth",
+        '../data/Flash_point.xlsx' : "Flash_point_embedding_1_0.4566019803325665.pth"
     }
 
-    model_folder = "../save_models_server/"
+    model_folder = "../save_models_server/embedding"
 
     for file_path, model_name in data_dict.items():
         print(file_path)

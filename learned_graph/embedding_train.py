@@ -1,3 +1,4 @@
+import argparse
 import os
 import pandas as pd
 import torch
@@ -11,7 +12,6 @@ from train_servier.gcn_loss import showFig
 
 
 
-device = torch.device(args.device)
 
 
 
@@ -87,22 +87,20 @@ def get_add_split_data(file_path):
 
 
 
-def train_embedding():
+def train_embedding(num_epochs=50, batch_size=64, hidden_dim=512, output_dim= 128, lr=0.01):
 
     train_dataset = molDataset.MolDataset(x_train, y_train)
     train_length = len(train_dataset)
-    train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 
-    embedding_net = EmbeddingMLP(input_dim, 512, 128)
+    embedding_net = EmbeddingMLP(input_dim, hidden_dim=hidden_dim, output_dim=output_dim)
     embedding_net = embedding_net.to(device)
-    optimizer = torch.optim.AdamW(embedding_net.parameters(), lr=0.01, weight_decay=1e-3)
+    optimizer = torch.optim.AdamW(embedding_net.parameters(), lr=lr, weight_decay=1e-3)
 
 
     loss_function = ContrastiveLoss(margin=margin)
     loss_function = loss_function.to(device)
 
-
-    num_epochs = 50
 
 
     train_record = {}
@@ -148,28 +146,47 @@ def train_embedding():
     return embedding_net, spearmanr_res[0], train_record, test_record
 
 
+
+
+
 if __name__ == '__main__':
 
-    margin = 3.0
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--num_epochs', type=int, default=50, help='Number of training epochs')
+    parser.add_argument('--margin', type=float, default=3.0, help='Margin for contrastive loss')
+    parser.add_argument('--batch_size', type=int, default=64, help='Batch size for training')
+    parser.add_argument('--hidden_dim', type=int, default=512, help='Hidden layer dimension in embedding network')
+    parser.add_argument('--output_dim', type=int, default=128, help='Output dimension of embedding network')
+    parser.add_argument('--lr', type=float, default=0.01, help='Learning rate for optimizer')
+    parser.add_argument('--device', type=str, default="cuda:0", help='device')
+    args = parser.parse_args()
+
+    num_epochs = args.num_epochs
+    margin = args.margin
+    batch_size = args.batch_size
+    hidden_dim = args.hidden_dim
+    output_dim = args.output_dim
+    lr = args.lr
+    device = torch.device(args.device)
+
     data_dict = {
-        '../data/ron_test/add_data.xlsx' : 1393,
-        # '../data/other/HOV.xlsx' : 1288,
-        # '../data/other/LHV.xlsx' : 1287,
-        # '../data/other/RON.xlsx' : 1393,
-        # '../data/other/MON.xlsx' : 1394,
-        # '../data/other/CN.xlsx' : 1394,
-        # '../data/other/YSI.xlsx' : 1394,
-        # '../data/other/Density.xlsx' : 1348,
-        # '../data/other/TB.xlsx' : 1287,
-        # '../data/other/TM.xlsx' : 1287,
-        # '../data/other/UFL.xlsx' : 1288,
-        # '../data/other/LFL.xlsx' : 1287,
-        # '../data/other/Viscosity.xlsx' : 1288,
-        # '../data/other/Enthalpy_of_Vaporization.xlsx' : 1288,
-        # '../data/other/VP.xlsx' : 1287,
-        # '../data/other/DCN.xlsx' : 1453,
-        # '../data/other/Surface_tension.xlsx' : 1348,
-        # '../data/other/Flash_point.xlsx' : 1287
+        '../data/HOV.xlsx' : 1288,
+        '../data/LHV.xlsx' : 1287,
+        '../data/RON.xlsx' : 1393,
+        '../data/MON.xlsx' : 1394,
+        '../data/CN.xlsx' : 1394,
+        '../data/YSI.xlsx' : 1394,
+        '../data/Density.xlsx' : 1348,
+        '../data/TB.xlsx' : 1287,
+        '../data/TM.xlsx' : 1287,
+        '../data/UFL.xlsx' : 1288,
+        '../data/LFL.xlsx' : 1287,
+        '../data/Viscosity.xlsx' : 1288,
+        '../data/Enthalpy_of_Vaporization.xlsx' : 1288,
+        '../data/VP.xlsx' : 1287,
+        '../data/DCN.xlsx' : 1453,
+        '../data/Surface_tension.xlsx' : 1348,
+        '../data/Flash_point.xlsx' : 1287
     }
 
     optimal_results = []
@@ -190,7 +207,13 @@ if __name__ == '__main__':
 
 
         for k in range(10):
-            embedding_net, res, train_record, test_record = train_embedding()
+            embedding_net, res, train_record, test_record = train_embedding(
+                num_epochs=num_epochs,
+                batch_size=batch_size,
+                hidden_dim=hidden_dim,
+                output_dim=output_dim,
+                lr=lr
+            )
             if res > maxRes:
                 maxRes = res
                 bestModel = embedding_net
