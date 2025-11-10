@@ -129,16 +129,13 @@ def build_gcn_features_for_new_data(X_anchor, X_new, feat_names, model, device, 
     S_anchor = np.dot(E_anchor, E_anchor.T)
     tr_knn = knn_train(S_anchor, k)
     tr_norm = l1_norm(tr_knn)
-    A_anchor, deg_anchor = norm_adj_train(tr_norm, a)
+    A_anchor, A_tilde_anchor, deg_anchor = norm_adj_train(tr_norm, a)
 
     X_anchor_s = model._x_scaler.transform(X_anchor).astype(np.float32)
     X_new_s = model._x_scaler.transform(X_new).astype(np.float32)
 
     n_anchor = X_anchor_s.shape[0]
     n_new = X_new_s.shape[0]
-
-    # 融合锚点自身（保持一致性）
-    X_anchor_fused = np.dot(A_anchor.astype(np.float32), X_anchor_s)
 
     # 构建新数据连接到锚点的图
     tr_block_new = np.hstack([A_anchor.astype(np.float32), np.zeros((n_anchor, n_new), dtype=np.float32)])

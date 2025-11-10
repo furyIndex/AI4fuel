@@ -1,0 +1,15 @@
+/data/home/Longh/.virtualenvs/ai4fuel/bin/python ./train_kfold/train.py \
+    --xlsx ./data/revision/descriptors_all.xlsx \
+    --mapping ./descriptors_group/descriptorsMap/descriptorsMapping.json \
+    --k 10 \
+    --a 0.1 \
+    --epochs_embed 200 \
+    --trials 5 \
+    --epochs_tr 500 \
+    --patience 50 \
+    --bs_tr 512 \
+    --only_sheet HOV \
+    --only_folds 1 \
+    --exp_k 1 \
+    --save_dir ./train_kfold/lg_transformer_kfold_runs \
+    --device cuda:0
