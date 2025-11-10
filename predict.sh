@@ -1,4 +1,4 @@
- /data/home/Longh/.virtualenvs/ai4fuel/bin/python ./load_model/kfold_predict.py \
+python ./load_model/kfold_predict.py \
      --fold_dir ./train_kfold/lg_transformer_kfold_runs/sheet_HOV/fold_1 \
      --xlsx_train ./data/revision/descriptors_all.xlsx   \
      --sheet_train HOV   \

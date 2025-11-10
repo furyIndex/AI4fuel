@@ -55,92 +55,83 @@ Replace **ai4fuel** with the actual name of the environment, as specified in the
 
 Before training, you need to copy the dataset corresponding to this project to the ``./data`` directory. [Here](https://drive.google.com/file/d/11w5gG3wpER595AhroFRgGlBFD78njCzc/view?usp=drive_link) contains all databases used in this project.
 
-### 1. Embedding Training
+Usage:
+```bash
+./train.sh
+```
+
+## Reproduce
 
 Usage:
 ```bash
-usage: embedding_train.py [-h] [--num_epochs NUM_EPOCHS] [--margin MARGIN] [--batch_size BATCH_SIZE] [--hidden_dim HIDDEN_DIM] [--output_dim OUTPUT_DIM] [--lr LR] [--device DEVICE]
-
-parameters for training molecular embedding
-
-options:
-  -h, --help              show this help message and exit
-  --num_epochs NUM_EPOCHS number of training epochs (default: 50)
-  --margin MARGIN         margin for contrastive loss (default: 3.0)
-  --batch_size BATCH_SIZE batch size for training (default: 64)
-  --hidden_dim HIDDEN_DIM hidden layer dimension in embedding network (default: 512)
-  --output_dim OUTPUT_DIM output dimension of embedding network (default: 128)
-  --lr LR                 learning rate for optimizer (default: 0.01)
-  --device DEVICE         device to use for training, e.g. "cuda:0" or "cpu" (default: "cuda:0")
-```
-Commands for embedding training:
-```bash
-python learned_graph/embedding_train.py --num_epochs 50 \
---margin 3.0 \
---batch_size 64 \
---hidden_dim 512 \
---output_dim 128 \
---lr 0.01 \
---device cuda:0
+./reproduce.sh
 ```
 
-### 2. Learned-graph feature fusion
 
-```bash
-python descriptors_group/save_learned_gcn_data.py
-```
-The default value for k in the code is 10, and the default value for $\alpha_g$ is 0.1. If you need to change other parameters, please set them manually.
-
-### 3. Transformer training
+## Predict
 
 Usage:
 ```bash
-usage: learned_graph_train.py [-h] [--sheet_name SHEET_NAME] [--n_trials N_TRIALS] [--device DEVICE]
-
-parameters for Optuna-based hyperparameter search for Transformer model
-
-options:
-  -h, --help              show this help message and exit
-  --sheet_name SHEET_NAME fused data sheet name (default: 'lg_k=10_a=0.1')
-  --n_trials N_TRIALS     number of Optuna trials for hyperparameter search (default: 100)
-  --device DEVICE         device to use for training, e.g. "cuda:0" or "cpu" (default: "cuda:0")
-
+./predict.sh
 ```
-Commands for embedding training:
-```bash
-python train_servier/learned_graph_train.py --sheet_name lg_k=10_a=0.1 \
---n_trials 100 \
---device cuda:0
-
-```
-
-
-## Training details
-
-The optimal parameters for all fuel property prediction models are given in the ``save_models_server/parameter`` folder.
-
 
 
 
 
 ## Demo
 
-The trained models corresponding to the versions in our paper are provided in ``save_models_server\lg_transformer``. Below is a demo for validating these models.
-
+### train
 ```bash
-python load_model/gcn-transformer_review.py
+./train.sh
 ```
 
 The expected output is as follows:
 
 ```
-=============================================
-CN
-train R2: 0.9641172289848328
-test R2: 0.8978157639503479
-=============================================
-...
+Fold (dir=fold_1): Test R2 = 0.8627  (seq_len=50, input_dim=606)
+[Skip] HOV / fold_2 不在 only_folds 中，跳过。
+[Skip] HOV / fold_3 不在 only_folds 中，跳过。
+[Skip] HOV / fold_4 不在 only_folds 中，跳过。
+[Skip] HOV / fold_5 不在 only_folds 中，跳过。
+------------------------------------------------------------
+Sheet: HOV | R2s: [0.8627]
+Mean R2: 0.8626533568345344
+Std  R2: 0.0
+
+================================================================================
+已完成训练的工作表总结：
+ - HOV  Mean R2 = 0.8627  Std = 0.0000  folds = [0.8627]
+================================================================================
 ```
+
+### reproduce
+```bash
+./reproduce.sh
+```
+
+The expected output is as follows:
+
+```
+[test] Reproduce R2 = 0.862653 (seq_len=50, input_dim=606)
+Saved: ./train_kfold/lg_transformer_kfold_runs/sheet_HOV/fold_1/predictions.csv
+```
+
+### predict
+```bash
+./predict.sh
+```
+
+The expected output is as follows:
+
+```
+Using outer_train (inner_train + inner_val) as graph anchor, total 277 samples.
+Loaded 277 samples as graph anchor from outer_train (inner_train + inner_val).
+Loaded 62 new samples for prediction.
+[Prediction Done] seq_len=50, input_dim=606, samples=62
+[Evaluation] R² on new data = 0.910097
+Saved predictions to: ./train_kfold/lg_transformer_kfold_runs/sheet_HOV/fold_1/./predictions_with_HOV_fold1.csv
+```
+
 
 
 ## License

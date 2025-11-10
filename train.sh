@@ -1,4 +1,4 @@
-/data/home/Longh/.virtualenvs/ai4fuel/bin/python ./train_kfold/train.py \
+python ./train_kfold/train.py \
     --xlsx ./data/revision/descriptors_all.xlsx \
     --mapping ./descriptors_group/descriptorsMap/descriptorsMapping.json \
     --k 10 \
