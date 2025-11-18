@@ -1,5 +1,0 @@
-File: ../data/other/Surface_tension.xlsx
-Best Value: 0.939228892326355
-Best Params: {'learning_rate': 0.0004435800174522772, 'batch_size': 64, 'dim_feedforward': 2048, 'num_heads': 2, 'num_layers': 1, 'hidden_size_1': 128, 'hidden_size_2': 1024, 'hidden_size_3': 256}
-Best epoch: 207
-----------------

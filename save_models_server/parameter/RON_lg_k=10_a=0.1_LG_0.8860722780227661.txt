@@ -1,5 +1,0 @@
-File: ../data/other/RON.xlsx
-Best Value: 0.8860722780227661
-Best Params: {'learning_rate': 0.00012491669470940557, 'batch_size': 64, 'dim_feedforward': 1024, 'num_heads': 2, 'num_layers': 4, 'hidden_size_1': 64, 'hidden_size_2': 1024, 'hidden_size_3': 128}
-Best epoch: 288
-----------------

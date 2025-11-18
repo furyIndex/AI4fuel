@@ -1,4 +1,0 @@
-File: ../data/other/TM.xlsx
-Best Value: 0.8668608665466309
-Best Params: {'learning_rate': 0.0005196397987185849, 'batch_size': 64, 'dim_feedforward': 512, 'num_heads': 1, 'num_layers': 1, 'hidden_size_1': 128, 'hidden_size_2': 1024, 'hidden_size_3': 256, 'epochs': 260}
-----------------

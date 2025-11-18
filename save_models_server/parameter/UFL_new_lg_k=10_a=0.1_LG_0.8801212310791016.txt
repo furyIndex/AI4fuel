@@ -1,5 +1,0 @@
-File: ../data/other/UFL.xlsx
-Best Value: 0.8801212310791016
-Best Params: {'learning_rate': 0.0006423639314983744, 'batch_size': 128, 'dim_feedforward': 512, 'num_heads': 6, 'num_layers': 4, 'hidden_size_1': 64, 'hidden_size_2': 1024, 'hidden_size_3': 256}
-Best epoch: 173
-----------------

@@ -1,5 +1,0 @@
-File: ../data/other/LHV.xlsx
-Best Value: 0.9950315952301025
-Best Params: {'learning_rate': 0.00010198295250206928, 'batch_size': 256, 'dim_feedforward': 512, 'num_heads': 2, 'num_layers': 2, 'hidden_size_1': 64, 'hidden_size_2': 1024, 'hidden_size_3': 256}
-Best epoch: 274
-----------------

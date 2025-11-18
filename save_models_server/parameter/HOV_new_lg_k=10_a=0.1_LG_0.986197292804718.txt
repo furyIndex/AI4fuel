@@ -1,5 +1,0 @@
-File: ../data/other/HOV.xlsx
-Best Value: 0.986197292804718
-Best Params: {'learning_rate': 0.001026277981187538, 'batch_size': 64, 'dim_feedforward': 512, 'num_heads': 1, 'num_layers': 1, 'hidden_size_1': 128, 'hidden_size_2': 1024, 'hidden_size_3': 256}
-Best epoch: 203
-----------------

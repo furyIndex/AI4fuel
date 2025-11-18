@@ -81,7 +81,7 @@ def main():
         descriptors_mapping = json.load(f)
     ensure_dir(args.save_dir)
 
-    stand_properties = ["CN", "Flash_point", "LHV", "MON", "RON", "Surface_tension", "Tb", "Tm"]
+    stand_properties = ["CN", "Flash_point", "LHV", "MON", "RON", "Surface_tension", "Tb", "Tm", "FE"]
 
     # ----------- 特殊路径：直接基于一个 split.json 复训该折 -----------
     if args.split_json is not None:

@@ -1,5 +1,0 @@
-File: ../data/other/Density.xlsx
-Best Value: 0.9445583820343018
-Best Params: {'learning_rate': 0.001198660111377494, 'batch_size': 64, 'dim_feedforward': 1024, 'num_heads': 2, 'num_layers': 1, 'hidden_size_1': 64, 'hidden_size_2': 1024, 'hidden_size_3': 128}
-Best epoch: 297
-----------------
