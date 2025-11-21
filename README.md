@@ -88,19 +88,15 @@ Usage:
 The expected output is as follows:
 
 ```
-Fold (dir=fold_1): Test R2 = 0.8627  (seq_len=50, input_dim=606)
-[Skip] HOV / fold_2 不在 only_folds 中，跳过。
-[Skip] HOV / fold_3 不在 only_folds 中，跳过。
-[Skip] HOV / fold_4 不在 only_folds 中，跳过。
-[Skip] HOV / fold_5 不在 only_folds 中，跳过。
+Fold (dir=fold_1): Test R2 = 0.9788  (seq_len=50, input_dim=606)
 ------------------------------------------------------------
-Sheet: HOV | R2s: [0.8627]
-Mean R2: 0.8626533568345344
+Sheet: EOV | R2s: [0.9788]
+Mean R2: 0.9788
 Std  R2: 0.0
 
 ================================================================================
-已完成训练的工作表总结：
- - HOV  Mean R2 = 0.8627  Std = 0.0000  folds = [0.8627]
+Summary of the completed training worksheets：
+ - HOV  Mean R2 = 0.9788  Std = 0.0000  folds = [0.9788]
 ================================================================================
 ```
 
@@ -112,8 +108,8 @@ Std  R2: 0.0
 The expected output is as follows:
 
 ```
-[test] Reproduce R2 = 0.862653 (seq_len=50, input_dim=606)
-Saved: ./train_kfold/lg_transformer_kfold_runs/sheet_HOV/fold_1/predictions.csv
+[test] Reproduce R2 = 0.9788 (seq_len=50, input_dim=606)
+Saved: ./train_kfold/lg_transformer_kfold_runs/sheet_EOV/fold_1/predictions.csv
 ```
 
 ### predict
@@ -124,12 +120,12 @@ Saved: ./train_kfold/lg_transformer_kfold_runs/sheet_HOV/fold_1/predictions.csv
 The expected output is as follows:
 
 ```
-Using outer_train (inner_train + inner_val) as graph anchor, total 277 samples.
-Loaded 277 samples as graph anchor from outer_train (inner_train + inner_val).
+Using outer_train (inner_train + inner_val) as graph anchor, total 442 samples.
+Loaded 442 samples as graph anchor from outer_train (inner_train + inner_val).
 Loaded 62 new samples for prediction.
 [Prediction Done] seq_len=50, input_dim=606, samples=62
-[Evaluation] R² on new data = 0.910097
-Saved predictions to: ./train_kfold/lg_transformer_kfold_runs/sheet_HOV/fold_1/./predictions_with_HOV_fold1.csv
+[Evaluation] R² on new data = 0.905895
+Saved predictions to: ./train_kfold/lg_transformer_kfold_runs/sheet_EOV/fold_5/./predictions_with_HOV_fold1.csv
 ```
 
 
