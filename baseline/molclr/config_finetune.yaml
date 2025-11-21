@@ -1,0 +1,41 @@
+
+batch_size: 64
+epochs: 300
+eval_every_n_epochs: 1
+log_every_n_steps: 50
+fp16_precision: False
+
+
+init_base_lr: 0.0001
+init_lr: 0.001
+weight_decay: 1e-5
+gpu: cuda:0
+task_name: MolCLR_FT
+
+
+
+model_type: gin
+model:
+  num_layer: 5
+  emb_dim: 300
+  feat_dim: 512
+  drop_ratio: 0.2
+  pool: mean
+
+
+dataset:
+  type: excel_splits
+  num_workers: 8
+  xlsx: ../data/revision/all_data.xlsx
+  splits_root: ../train_kfold/lg_transformer_kfold_runs
+  sheet: ALL
+
+  smiles_col: SMILES
+  task: regression
+
+
+fine_tune_from: ./ckpt/pretrained_gin/checkpoints/model.pth
+
+
+
+freeze_backbone: false

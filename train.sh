@@ -8,7 +8,7 @@ python ./train_kfold/train.py \
     --epochs_tr 500 \
     --patience 50 \
     --bs_tr 512 \
-    --only_sheet HOV \
+    --only_sheet EOV \
     --only_folds 1 \
     --exp_k 1 \
     --save_dir ./train_kfold/lg_transformer_kfold_runs \

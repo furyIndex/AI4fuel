@@ -27,27 +27,27 @@ class LogTargetScaler:
         self._mean_ = 0.0
         self._scale_ = 1.0
         self.eps_ = None
-        # 训练端可能存的属性（做数值保护）
+
         self.z_min_ = None
         self.z_max_ = None
         self.y_max_ = None
         self.clip_margin = 1.0
 
-    # 推理阶段只需要 inverse_transform；transform/fit 可不严格实现
+
     def inverse_transform(self, z):
         import numpy as np
         z = np.asarray(z).reshape(-1)
-        # 去标准化
+
         if self._std is not None:
             z = z * (getattr(self, "_scale_", 1.0) + 1e-12) + getattr(self, "_mean_", 0.0)
-        # 裁剪 z，避免 10**z 溢出
+
         z_lo = (self.z_min_ if self.z_min_ is not None else -50.0) - self.clip_margin
         z_hi = (self.z_max_ if self.z_max_ is not None else  50.0) + self.clip_margin
         z = np.clip(z, z_lo, z_hi)
-        # 反变换
+
         eps = self.eps_ if getattr(self, "eps_", None) is not None else (self.eps if self.eps is not None else 0.0)
         y = (self.base ** z) - eps
-        # 兜底清理
+
         upper = (self.y_max_ * 1e3) if (self.y_max_ is not None) else 1e12
         y = np.nan_to_num(y, nan=0.0, posinf=upper, neginf=0.0)
         return y
@@ -55,14 +55,14 @@ class LogTargetScaler:
 
 
 
-# ====== 工具函数 ======
+
 
 def to_tensor(x):
     return torch.tensor(x, dtype=torch.float32)
 
 
 def inv_if_scaler(arr, scaler):
-    """统一反变换：兼容 StandardScaler / LogTargetScaler；并做数值兜底"""
+
     if scaler is None:
         return arr
     import numpy as _np
@@ -74,9 +74,9 @@ def inv_if_scaler(arr, scaler):
 
 
 def safe_load(path, device):
-    """更稳妥的反序列化（优先尝试 weights_only=False；必要时允许自定义类）"""
+
     try:
-        # PyTorch 2.6+ 提供 safe_globals；此处做兼容
+
         from torch.serialization import safe_globals
         with safe_globals([EmbeddingMLP, SimpleTransformerRegressor, StandardScaler, LogTargetScaler]):
             return torch.load(path, map_location=device)
@@ -84,25 +84,22 @@ def safe_load(path, device):
         return torch.load(path, map_location=device, weights_only=False)
 
 
-# ====== 读取 sheet（兼容“训练文件的老格式”和“预测文件的新格式”） ======
-# 训练文件（old）：第一列可能是 category（字符串），第二列 label，后续是特征
-# 预测文件（new）：第一列 label，第二列起是特征（无 category）
 
 def load_sheet_flexible(xlsx_path, sheet_name):
     df = pd.read_excel(xlsx_path, sheet_name=sheet_name)
     if df.shape[1] < 2:
-        raise ValueError(f"工作表 '{sheet_name}' 至少需要两列：label, features...")
-    # 猜测第一列是否 label：数值比例很高则视为 label-first
+        raise ValueError("At least two columns are required：label, features...")
+
     first_is_numeric = pd.api.types.is_numeric_dtype(df.iloc[:, 0])
     second_is_numeric = pd.api.types.is_numeric_dtype(df.iloc[:, 1]) if df.shape[1] > 1 else False
     if first_is_numeric and (df.shape[1] == 2 or second_is_numeric):
-        # label-first: [label, f1, f2, ...]
+
         cats = np.array(["NA"] * len(df))
         y = df.iloc[:, 0].values.astype(np.float32)
         X = df.iloc[:, 1:].values.astype(np.float32)
         feat_names = [str(c) for c in df.columns[1:]]
     else:
-        # category-first: [category, label, f1, f2, ...]
+
         cats = df.iloc[:, 0].values
         y = df.iloc[:, 1].values.astype(np.float32)
         X = df.iloc[:, 2:].values.astype(np.float32)
@@ -114,7 +111,7 @@ def load_sheet_flexible(xlsx_path, sheet_name):
 def load_stage15_sheet(xlsx_path, sheet_name):
     df = pd.read_excel(xlsx_path, sheet_name=sheet_name)
     if df.shape[1] < 3:
-        raise ValueError("stage1.5 sheet 至少需要三列：category, label, 以及若干组列")
+        raise ValueError("Stage 1.5 sheet requires at least three columns：category, label, descriptors...")
     cats = df.iloc[:, 0].values
     y    = df.iloc[:, 1].values.astype(np.float32)
     group_cols = list(df.columns[2:])
@@ -133,7 +130,6 @@ def load_stage15_sheet(xlsx_path, sheet_name):
     return X, y, cats, group_cols, input_dim, seq_len, df
 
 
-# ====== 阶段 1 / 1.5：与训练端保持一致 ======
 
 def embed(model, X, device):
     x_s = model._x_scaler.transform(X)
@@ -143,18 +139,17 @@ def embed(model, X, device):
 
 
 
-# =================== 主流程 ===================
 
 def main():
     sys.argv = _ORIG_ARGV
 
     ap = argparse.ArgumentParser()
     ap.add_argument('--fold_dir', required=True,
-                    help='训练产物目录（含 embedding_best.pth / transformer_best.pth / y_scaler.pth / split.json）')
+                    help='Training output directory (including embedding_best.pth / transformer_best.pth / y_scaler.pth / split.json)')
     ap.add_argument('--device', default='cuda' if torch.cuda.is_available() else 'cpu')
 
-    ap.add_argument('--repro_which', default='test', help='复现哪个切片的评估（sheet 名称）')
-    # 输出
+    ap.add_argument('--repro_which', default='test', help='Reproduce the assessment of which slice (sheet name)')
+
     ap.add_argument('--out_csv', default='predictions.csv')
 
 
@@ -164,27 +159,6 @@ def main():
     args = ap.parse_args()
     device = torch.device(args.device)
 
-    # 读取 split.json
-    split_path = os.path.join(args.fold_dir, 'split.json')
-    if not os.path.exists(split_path):
-        raise FileNotFoundError("缺少 split.json: " + split_path)
-    with open(split_path, 'r', encoding='utf-8') as f:
-        split = json.load(f)
-
-    k        = int(split.get('k', 10))
-    a        = float(split.get('a', 0.1))
-    grouped  = bool(split.get('grouped', True))
-    mapping_path = split.get('mapping_path', None)
-
-    # descriptors 分组
-    descriptors_mapping = None
-    if grouped:
-        if mapping_path is None or not os.path.exists(mapping_path):
-            raise FileNotFoundError("需要 descriptors 分组 JSON（mapping_path）。")
-        with open(mapping_path, 'r', encoding='utf-8') as f:
-            descriptors_mapping = json.load(f)
-
-    # 加载模型与 scaler
     embedding_path   = os.path.join(args.fold_dir, 'embedding_best.pth')
     transformer_path = os.path.join(args.fold_dir, 'transformer_best.pth')
     y_scaler_path    = os.path.join(args.fold_dir, 'y_scaler.pth')
@@ -196,10 +170,9 @@ def main():
     trans_model = safe_load(transformer_path, device); trans_model.eval()
     y_scaler    = safe_load(y_scaler_path, device)
 
-    # 直接读取 stage1.5 特征
     st15_path = os.path.join(args.fold_dir, 'stage15_fused_grouped_outer.xlsx')
     if not os.path.exists(st15_path):
-        raise FileNotFoundError("找不到阶段1.5特征文件: " + st15_path)
+        raise FileNotFoundError("Cannot find the stage 1.5 feature file: " + st15_path)
     X_seq, y, cats, group_cols, input_dim, seq_len, raw_df = load_stage15_sheet(st15_path, args.repro_which)
 
     with torch.no_grad():

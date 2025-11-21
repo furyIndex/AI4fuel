@@ -8,7 +8,7 @@ import os
 
 from train_kfold.kfold_scaler import LogTargetScaler, inv_if_scaler
 
-os.environ["CUBLAS_WORKSPACE_CONFIG"] = ":4096:8"  # 或 ":16:8"
+os.environ["CUBLAS_WORKSPACE_CONFIG"] = ":4096:8"
 
 import argparse
 import json
@@ -53,16 +53,7 @@ def embed(model, X, device):
 
 
 def save_stage15_to_xlsx(writer, sheet_name, categories, labels, X_seq, group_order):
-    '''
-    保存融合后特征数据方便复现
-    :param writer:
-    :param sheet_name:
-    :param categories:
-    :param labels:
-    :param X_seq:
-    :param group_order:
-    :return:
-    '''
+
     n = X_seq.shape[0]
     seq_len = X_seq.shape[1]
     data = {"category": list(categories), "label": [float(v) for v in labels]}
@@ -80,11 +71,6 @@ def save_stage15_to_xlsx(writer, sheet_name, categories, labels, X_seq, group_or
 
 
 
-
-
-
-
-# -------------------- stage1：embedding training --------------------
 def train_embedding_stage(X_tr, y_tr, X_val, y_val, input_dim, device,
                           max_epochs=200,
                           patience=15,
@@ -119,14 +105,14 @@ def train_embedding_stage(X_tr, y_tr, X_val, y_val, input_dim, device,
             loss.backward()
             optimizer.step()
 
-        # 验证
+
         model.eval()
         with torch.no_grad():
             pred = model(to_tensor(X_val_s).to(device))
             sp = embedding_val_func(pred, to_tensor(y_val_s.reshape(-1, 1)).to(device))
             sp_val = float(sp[0]) if isinstance(sp, (list, tuple, np.ndarray)) else float(sp)
 
-        # 早停逻辑
+
         if sp_val > best_spearman:
             best_spearman = sp_val
             best_state = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
@@ -152,49 +138,48 @@ def train_embedding_stage(X_tr, y_tr, X_val, y_val, input_dim, device,
 
 
 
-# -------------------- stage1.5：gcn feature fusion --------------------
 def build_gcn_features(X_tr, X_val, X_te, feat_names, model, device, k=10, a=0.1,
                        grouped=True, mapping=None):
-    # embedding
+
     E_tr = embed(model, X_tr, device)
     E_val = embed(model, X_val, device)
     E_te = embed(model, X_te, device)
-    # 相似性矩阵
+
     S_tr = np.dot(E_tr, E_tr.T)
     S_val = np.dot(E_val, E_tr.T)
     S_te = np.dot(E_te, E_tr.T)
-    # 训练图构建
+
     tr_knn = knn_train(S_tr, k)
     tr_norm = l1_norm(tr_knn)
     A_tr, A_tilde_tr, deg_tr = norm_adj_train(tr_norm, a)
-    # 特征标准化
+
     X_tr_s = model._x_scaler.transform(X_tr).astype(np.float32)
     X_val_s = model._x_scaler.transform(X_val).astype(np.float32)
     X_te_s = model._x_scaler.transform(X_te).astype(np.float32)
 
     n_tr, n_val, n_te = X_tr_s.shape[0], X_val_s.shape[0], X_te_s.shape[0]
-    # 融合后的训练集
+
     Xtr_fused = np.dot(A_tilde_tr.astype(np.float32), X_tr_s)
 
 
-    # 验证集连接到训练集
+
     tr_block_val = np.hstack([A_tr.astype(np.float32), np.zeros((n_tr, n_val), dtype=np.float32)])
     val_block = knn_val(S_val, n_val, n_tr + n_val, k).astype(np.float32)
     full_A_val = np.vstack([tr_block_val, val_block])
     A_val = norm_adj_val(full_A_val, deg_tr, a)
     X_stack_val = np.vstack([X_tr_s, X_val_s]).astype(np.float32)
     Xval_fused = np.dot(A_val, X_stack_val)[-n_val:]
-    # 测试集连接到训练集
+
     tr_block_te = np.hstack([A_tr.astype(np.float32), np.zeros((n_tr, n_te), dtype=np.float32)])
     te_block = knn_val(S_te, n_te, n_tr + n_te, k).astype(np.float32)
     full_A_te = np.vstack([tr_block_te, te_block])
     A_te = norm_adj_val(full_A_te, deg_tr, a)
     X_stack_te = np.vstack([X_tr_s, X_te_s]).astype(np.float32)
     Xte_fused = np.dot(A_te, X_stack_te)[-n_te:]
-    # 按描述符种类分组
+
     if grouped:
         if mapping is None:
-            raise ValueError("Grouped=True 需要 descriptors mapping JSON。")
+            raise ValueError("Grouped=True need descriptors mapping JSON。")
         max_cols = max(len(v) for v in mapping.values())
         group_order = list(mapping.keys())
         name2idx = {nm: i for i, nm in enumerate(feat_names)}
@@ -227,20 +212,7 @@ def build_gcn_features(X_tr, X_val, X_te, feat_names, model, device, k=10, a=0.1
 
 def build_gcn_features_outer_anchor(X_tr, X_val, X_te, feat_names, model, device, k=10, a=0.1,
                                     grouped=True, mapping=None):
-    '''
-    找到最佳参数后在训练集+验证集上重训一遍，测试集连接到训练集+验证集
-    :param X_tr:
-    :param X_val:
-    :param X_te:
-    :param feat_names:
-    :param model:
-    :param device:
-    :param k:
-    :param a:
-    :param grouped:
-    :param mapping:
-    :return:
-    '''
+
     X_outer = np.vstack([X_tr, X_val]).astype(np.float32)
 
     E_outer = embed(model, X_outer, device)
@@ -272,7 +244,7 @@ def build_gcn_features_outer_anchor(X_tr, X_val, X_te, feat_names, model, device
 
     if grouped:
         if mapping is None:
-            raise ValueError("Grouped=True 需要 descriptors mapping JSON。")
+            raise ValueError("Grouped=True need descriptors mapping JSON。")
         max_cols = max(len(v) for v in mapping.values())
         group_order = list(mapping.keys())
         name2idx = {nm: i for i, nm in enumerate(feat_names)}
@@ -303,7 +275,7 @@ def build_gcn_features_outer_anchor(X_tr, X_val, X_te, feat_names, model, device
 
 
 
-# -------------------- stage2：transformer training --------------------
+
 def train_transformer_with_es(Xtr_seq, y_tr_norm, Xval_seq, y_val_orig,
                               seq_len, input_dim, device,
                               num_heads, num_layers, dim_feedforward,
@@ -372,13 +344,13 @@ def train_transformer_with_es(Xtr_seq, y_tr_norm, Xval_seq, y_val_orig,
 
 
 
-# --------------------the training process of a fold--------------------------------------
+
 def train_one_fold_by_indices(sheet_name, X, y, cats, feat_names, row_ids,
                               outer_train_idx, outer_test_idx, inner_train_idx, inner_val_idx,
                               descriptors_mapping, args, device, fold_dir, stand_properties):
     ensure_dir(fold_dir)
 
-    # 按照split索引提取训练、验证、测试集
+
     idx2pos = {int(rid): pos for pos, rid in enumerate(row_ids.tolist())}
     tr_pos = np.array([idx2pos[i] for i in inner_train_idx], dtype=int)
     val_pos = np.array([idx2pos[i] for i in inner_val_idx], dtype=int)
@@ -388,18 +360,17 @@ def train_one_fold_by_indices(sheet_name, X, y, cats, feat_names, row_ids,
     X_te, y_te, c_te = X[te_pos], y[te_pos], cats[te_pos]
 
 
-    print("开始第一阶段训练。。。。。。。")
+    print("Start the first stage of training......")
 
     embed_model = train_embedding_stage(
         X_tr, y_tr, X_val, y_val,
         input_dim=X.shape[1], device=device,
-        max_epochs=args.epochs_embed,  # 重命名参数
-        patience=50,  # 可设为 args.patience_embed 或固定值
+        max_epochs=args.epochs_embed,
+        patience=50,
         batch_size=args.bs_embed,
         lr=args.lr_embed, weight_decay=args.wd_embed, margin=args.margin,
     )
 
-    print("第一阶段训练完成。")
     torch.save(embed_model, os.path.join(fold_dir, 'embedding_best.pth'))
 
 
@@ -414,10 +385,10 @@ def train_one_fold_by_indices(sheet_name, X, y, cats, feat_names, row_ids,
             save_stage15_to_xlsx(writer, 'train', c_tr, y_tr, Xtr_seq, group_order)
             save_stage15_to_xlsx(writer, 'val', c_val, y_val, Xval_seq, group_order)
             save_stage15_to_xlsx(writer, 'test', c_te, y_te, Xte_seq, group_order)
-    print("该折融合后数据已保存。。。。")
-    print(f"开始第二阶段训练。。。。。")
 
-    # 阶段二：目标变换（支持 log 空间） + Optuna
+    print(f"Start the second stage of training......")
+
+
     if sheet_name not in stand_properties:
         y_scaler_tr = LogTargetScaler(base=10, eps=None, with_std=True)
         y_scaler_tr.fit(y_tr)
@@ -431,9 +402,9 @@ def train_one_fold_by_indices(sheet_name, X, y, cats, feat_names, row_ids,
 
     def objective(trial):
         num_layers = trial.suggest_int('num_layers', 1, 4)
-        # moleculeNet和我的数据集的head不一样，我的数据集设置为1，2，mole数据集设置为1，2，3，6
-        num_heads = trial.suggest_categorical('num_heads', [1, 2])
 
+        # Set the moleculeNet dataset to [1, 2, 3, 6].
+        num_heads = trial.suggest_categorical('num_heads', [1, 2])
 
         dim_feedforward = trial.suggest_categorical('dim_feedforward', [256, 512, 1024])
         hidden1 = trial.suggest_categorical('hidden1', [64, 128, 256])
@@ -483,8 +454,7 @@ def train_one_fold_by_indices(sheet_name, X, y, cats, feat_names, row_ids,
         )
 
 
-    # -------- 使用外层的 train+val 合并重训最终模型，再评估 test --------
-    # 基于训练集+验证集重建阶段 1.5
+
     Xouter_seq, Xte_seq_outer, seq_len2, input_dim2, group_order2 = build_gcn_features_outer_anchor(
         X_tr, X_val, X_te, feat_names, embed_model, device,
         k=args.k, a=args.a, grouped=True, mapping=descriptors_mapping
@@ -499,7 +469,7 @@ def train_one_fold_by_indices(sheet_name, X, y, cats, feat_names, row_ids,
         final_scaler = StandardScaler()
         y_full_norm = final_scaler.fit_transform(y_full.reshape(-1, 1)).ravel()
 
-    # 用训练集+验证集融合特征重训最终模型
+
     final_model = SimpleTransformerRegressor(
         input_dim=input_dim2,
         seq_length=seq_len2,
@@ -532,7 +502,7 @@ def train_one_fold_by_indices(sheet_name, X, y, cats, feat_names, row_ids,
             torch.nn.utils.clip_grad_norm_(final_model.parameters(), max_norm=1.0)
             optim.step()
 
-    # 保存训练集+验证集阶段 1.5 融合特征
+
     if args.save_stage15:
         save_path_outer = os.path.join(fold_dir, 'stage15_fused_grouped_outer.xlsx')
         with pd.ExcelWriter(save_path_outer, engine='openpyxl', mode='w') as writer:
@@ -541,7 +511,7 @@ def train_one_fold_by_indices(sheet_name, X, y, cats, feat_names, row_ids,
             save_stage15_to_xlsx(writer, 'train', c_outer, y_outer, Xouter_seq, group_order2)
             save_stage15_to_xlsx(writer, 'test', c_te, y_te, Xte_seq_outer, group_order2)
 
-    # 在测试集融合特征上评估
+
     final_model.eval()
     with torch.no_grad():
         yhat_te_norm = final_model(to_tensor(Xte_seq_outer).to(device)).cpu().numpy().ravel()
@@ -562,13 +532,12 @@ def train_one_fold_by_indices(sheet_name, X, y, cats, feat_names, row_ids,
     })
     test_pred.to_csv(os.path.join(fold_dir, 'test_predictions.csv'), index=False)
 
-    # 记录 split.json（复写/更新）
+
     split_info = {
         "Test R2": r2,
         "sheet": sheet_name,
         "seed": int(args.seed),
         "stratified_by": "category+log(y)",
-
         "k": int(args.k),
         "a": float(args.a),
         "mapping_path": os.path.abspath(args.mapping),

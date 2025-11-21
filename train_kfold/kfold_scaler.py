@@ -2,7 +2,6 @@ import numpy as np
 
 
 class LogTargetScaler:
-
     def __init__(self, base: float = 10.0, eps: float = None, with_std: bool = False):
         self.base = float(base)
         self.eps = eps
@@ -15,7 +14,6 @@ class LogTargetScaler:
         self.z_max_ = None
         self.y_max_ = None
         self.clip_margin = 1.0
-
     @staticmethod
     def _ensure_1d(a):
         import numpy as np
@@ -26,7 +24,6 @@ class LogTargetScaler:
 
     def fit(self, y):
         y = self._ensure_1d(y)
-        # auto epsilon from the smallest positive
         if self.eps is None:
             pos = y[y > 0]
             min_pos = float(np.min(pos)) if pos.size > 0 else 1e-12
@@ -72,12 +69,6 @@ class LogTargetScaler:
 
 
 def inv_if_scaler(arr, scaler):
-    '''
-    反归一化、反log化
-    :param arr:
-    :param scaler:
-    :return:
-    '''
     if scaler is None:
         return arr
     import numpy as np

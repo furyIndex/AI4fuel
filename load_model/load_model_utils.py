@@ -86,7 +86,9 @@ def showFig(name, y_true, y_pred, save_path):
     plt.legend(loc='upper left', fontsize=16)
     plt.tight_layout()
     plt.savefig(save_path, dpi=300, bbox_inches='tight')
-    # plt.show()
+
+
+    plt.show()
     plt.close()
 
 

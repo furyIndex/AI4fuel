@@ -5,7 +5,7 @@ from train_kfold.train_domain import ensure_dir, train_one_fold_by_indices
 _ORIG_ARGV = sys.argv[:]
 sys.argv = [sys.argv[0]]
 import os
-os.environ["CUBLAS_WORKSPACE_CONFIG"] = ":4096:8"  # 或 ":16:8"
+os.environ["CUBLAS_WORKSPACE_CONFIG"] = ":4096:8"
 import argparse
 import random
 import shutil
@@ -36,7 +36,7 @@ def set_seed(seed=42):
 
 
 
-# -------------------- 主流程 --------------------
+
 def main():
     sys.argv = _ORIG_ARGV
 
@@ -47,17 +47,15 @@ def main():
     ap.add_argument('--seed', type=int, default=42)
     ap.add_argument('--save_dir', default='./lg_transformer_kfold_runs')
 
-    # 选择性重训相关
-    ap.add_argument('--only_sheet', default=None, help='只训练该 sheet（不填则遍历全部 sheet）')
-    ap.add_argument('--only_folds', default=None, help='只训练这些折（1 基，逗号分隔，如 2 或 1,3,5）')
-    ap.add_argument('--split_json', default=None, help='指定已有 split.json，按其划分重训该折')
-    ap.add_argument('--use_saved_splits', action='store_true', help='5 折流程中优先复用各折 split.json 中的划分')
+    ap.add_argument('--only_sheet', default=None, help='Only train this sheet (if not filled in, it will train all sheets)')
+    ap.add_argument('--only_folds', default=None, help='Only train these combinations (1 base, separated by commas, such as 2 or 1,3,5)')
+    ap.add_argument('--split_json', default=None, help='Specify the existing "split.json" and re-train the model according to its divisions.')
+    ap.add_argument('--use_saved_splits', action='store_true', help='In the 5-fold process, the partitions defined in each split.json file are prioritized for reuse.')
 
-    # GCN 参数
     ap.add_argument('--k', type=int, default=10)
     ap.add_argument('--a', type=float, default=0.1)
 
-    # 阶段一（embedding）
+    # stage 1（embedding）
     ap.add_argument('--epochs_embed', type=int, default=50)
     ap.add_argument('--bs_embed', type=int, default=512)
     ap.add_argument('--lr_embed', type=float, default=1e-2)
@@ -65,14 +63,14 @@ def main():
     ap.add_argument('--margin', type=float, default=3.0)
 
 
-    # 阶段二（Optuna + 早停）
+    # stage 2（Optuna）
     ap.add_argument('--trials', type=int, default=50)
     ap.add_argument('--epochs_tr', type=int, default=500)
     ap.add_argument('--patience', type=int, default=50)
     ap.add_argument('--bs_tr', type=int, default=512)
     ap.add_argument('--save_stage15', default=True, action='store_true')
 
-    ap.add_argument('--exp_k', type=int, default=1, help='每个 fold 重复实验次数')
+    ap.add_argument('--exp_k', type=int, default=10, help='Each fold randomly repeats the experiment for a certain number of times.')
 
     args = ap.parse_args()
     set_seed(args.seed)
@@ -81,13 +79,13 @@ def main():
         descriptors_mapping = json.load(f)
     ensure_dir(args.save_dir)
 
-    stand_properties = ["CN", "Flash_point", "LHV", "MON", "RON", "Surface_tension", "Tb", "Tm", "FE"]
+    stand_properties = ["CN", "FP", "LHV", "MON", "RON", "ST", "BP", "MP", "SEF"]
 
-    # ----------- 特殊路径：直接基于一个 split.json 复训该折 -----------
+
     if args.split_json is not None:
         split_path = os.path.abspath(args.split_json)
         if not os.path.isfile(split_path):
-            raise FileNotFoundError(f"split.json 不存在：{split_path}")
+            raise FileNotFoundError(f"split.json does not exist：{split_path}")
         with open(split_path, 'r', encoding='utf-8') as fp:
             split = json.load(fp)
 
@@ -96,7 +94,6 @@ def main():
 
         fold_root = os.path.dirname(split_path)
 
-        # 单折多次尝试
         if args.exp_k == 1:
             r2 = train_one_fold_by_indices(
                 sheet_name=sheet_name,
@@ -110,7 +107,7 @@ def main():
                 fold_dir=fold_root,
                 stand_properties=stand_properties
             )
-            print(f"[DONE] 复训完成（split.json：{split_path}），Test R2 = {round(r2, 4)}")
+            print(f"[DONE] Re-training completed（split.json：{split_path}），Test R2 = {round(r2, 4)}")
             return
         else:
             base_seed = int(args.seed)
@@ -164,18 +161,18 @@ def main():
                 with open(sp_path, 'w', encoding='utf-8') as fp:
                     json.dump(spj, fp, ensure_ascii=False, indent=2)
             except Exception as e:
-                print(f"[Warn] 修正 split.json 失败：{e}")
+                print(f"[Warn] Failed to correct split.json：{e}")
 
             print(
-                f"[DONE] split.json 复训 {args.exp_k} 次，R2 列表 = {[round(x, 4) for x in attempt_r2s]}，最佳 exp_{best_exp} -> Test R2 = {round(best_r2, 4)}")
+                f"[DONE] split.json re-train {args.exp_k} ，R2 list = {[round(x, 4) for x in attempt_r2s]}，best exp_{best_exp} -> Test R2 = {round(best_r2, 4)}")
             return
 
-    # ----------- 常规流程：遍历 sheet / 折；可过滤 -----------
+
     all_sheets = pd.ExcelFile(args.xlsx).sheet_names
     if args.only_sheet is not None:
         all_sheets = [s for s in all_sheets if s == args.only_sheet]
         if not all_sheets:
-            raise ValueError(f"未找到指定 sheet：{args.only_sheet}")
+            raise ValueError(f"The specified sheet was not found：{args.only_sheet}")
 
     allowed_folds = None
     if args.only_folds is not None:
@@ -185,7 +182,7 @@ def main():
 
     for sheet_name in all_sheets:
         print("\n" + "=" * 80)
-        print("开始处理工作表：", sheet_name)
+        print("Start processing the worksheet：", sheet_name)
         print("=" * 80)
 
         X, y, cats, feat_names, row_ids = load_sheet(args.xlsx, sheet_name)
@@ -209,29 +206,26 @@ def main():
         fold_metrics = []
         for fold_id, (trval_idx, te_idx) in enumerate(folds, start=1):
             if (allowed_folds is not None) and (fold_id not in allowed_folds):
-                print(f"[Skip] {sheet_name} / fold_{fold_id} 不在 only_folds 中，跳过。")
+                print(f"[Skip] {sheet_name} / fold_{fold_id} is not in only_folds, so skip it.")
                 continue
 
             fold_dir = os.path.join(run_root, f'fold_{fold_id}')
             ensure_dir(fold_dir)
 
-            # 默认按当前构造；若要求复用旧划分、且有 split.json，则覆盖为旧划分
             outer_train_idx = row_ids[trval_idx].tolist()
             outer_test_idx = row_ids[te_idx].tolist()
 
             split_json_path = os.path.join(fold_dir, 'split.json')
             use_old_split = args.use_saved_splits and os.path.isfile(split_json_path)
             if use_old_split:
-                print(f"[Info] 复用已有划分：{split_json_path}")
+                print(f"[Info] Reuse the existing split：{split_json_path}")
                 with open(split_json_path, 'r', encoding='utf-8') as fp:
                     old = json.load(fp)
-                # 强制使用旧的内/外层索引（全局行号）
                 outer_train_idx = old["outer_train_idx"]
                 outer_test_idx = old["outer_test_idx"]
                 inner_train_idx = old["inner_train_idx"]
                 inner_val_idx = old["inner_val_idx"]
             else:
-                # 现划分：在外层训练集上分层出 20% 验证
                 rel_ids = np.arange(len(trval_idx))
                 c_trval = cats[trval_idx]
                 y_trval = y[trval_idx]
@@ -251,7 +245,6 @@ def main():
                 inner_val_idx = row_ids[trval_idx[rel_val]].tolist()
 
 
-            # === 真正训练该折 ===
             if args.exp_k == 1:
                 r2 = train_one_fold_by_indices(
                     sheet_name=sheet_name,
@@ -266,7 +259,6 @@ def main():
                     stand_properties=stand_properties
                 )
                 fold_metrics.append(r2)
-                # 更新 manifest
                 cv_manifest["folds"].append({
                     "fold_id": int(fold_id),
                     "test_r2": float(r2),
@@ -278,7 +270,7 @@ def main():
                 })
             else:
                 print(
-                    f"[Info] {sheet_name} / fold_{fold_id} 启用 exp_k={args.exp_k} 次尝试，选择测试 R2 最佳的一次保存。")
+                    f"[Info] {sheet_name} / fold_{fold_id} start exp_k={args.exp_k} try。")
                 base_seed = int(args.seed)
                 best_r2 = -1e18
                 best_exp = None
@@ -319,7 +311,6 @@ def main():
                 st15 = os.path.join(best_dir, 'stage15_fused_grouped.xlsx')
                 if os.path.exists(st15):
                     shutil.copy2(st15, os.path.join(fold_dir, 'stage15_fused_grouped.xlsx'))
-                # 修正 split.json 的 files 指向根目录
                 try:
                     sp_path = os.path.join(fold_dir, 'split.json')
                     with open(sp_path, 'r', encoding='utf-8') as fp:
@@ -331,13 +322,12 @@ def main():
                     with open(sp_path, 'w', encoding='utf-8') as fp:
                         json.dump(spj, fp, ensure_ascii=False, indent=2)
                 except Exception as e:
-                    print(f"[Warn] 修正 split.json 失败：{e}")
+                    print(f"[Warn] Failed to correct split.json：{e}")
 
                 r2 = float(best_r2)
                 fold_metrics.append(r2)
                 print(
-                    f"[Result] {sheet_name} / fold_{fold_id} R2 尝试 = {[round(x, 4) for x in attempt_r2s]}，最佳 exp_{best_exp} -> Test R2 = {round(r2, 4)}")
-                # 更新 manifest 指向根目录产物
+                    f"[Result] {sheet_name} / fold_{fold_id} R2 try = {[round(x, 4) for x in attempt_r2s]}，best exp_{best_exp} -> Test R2 = {round(r2, 4)}")
                 cv_manifest["folds"].append({
                     "fold_id": int(fold_id),
                     "test_r2": float(r2),
@@ -348,7 +338,7 @@ def main():
                     "best_exp": int(best_exp)
                 })
 
-        # 写入当前 sheet 的 manifest
+
         with open(os.path.join(run_root, 'cv_manifest.json'), 'w', encoding='utf-8') as fp:
             json.dump(cv_manifest, fp, ensure_ascii=False, indent=2)
 
@@ -364,12 +354,12 @@ def main():
                 "sheet": sheet_name, "mean_r2": mean_r2, "std_r2": std_r2, "fold_r2": r_list
             })
         else:
-            print(f"[Warn] {sheet_name} 未训练到任何折（可能 all 被过滤）。")
+            print(f"[Warn] No training has been performed on any folds.")
 
-    # 汇总
+
     if all_sheet_summary:
         print("\n" + "=" * 80)
-        print("已完成训练的工作表总结：")
+        print("Summary of the completed training worksheets：")
         for rec in all_sheet_summary:
             print(
                 f" - {rec['sheet']}  Mean R2 = {rec['mean_r2']:.4f}  Std = {rec['std_r2']:.4f}  folds = {rec['fold_r2']}")

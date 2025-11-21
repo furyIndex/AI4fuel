@@ -1,6 +1,6 @@
 /data/home/Longh/.virtualenvs/ai4fuel/bin/python train_moleculeNet.py \
-    --csv ../data/molnet_desc/Lipophilicity_desc.csv \
-    --dataset Lipophilicity \
+    --csv ../data/molnet_desc/esol_desc.csv \
+    --dataset Esol \
     --mapping ../descriptors_group/descriptorsMap/descriptorsMapping.json \
     --exp_k 10 \
     --seed 42 \

@@ -1,16 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Compute Mordred descriptors for MoleculeNet-style CSVs where:
-- Column 0 is SMILES
-- Columns 1..N are label columns (single- or multi-task)
-
-Output: one CSV per input, with columns:
-  [label__col1, label__col2, ...] + [mordred descriptors...]
-
-Dependencies:
-  pip install pandas numpy rdkit-pypi mordred
-"""
 
 import os, glob, argparse
 import numpy as np
@@ -20,7 +7,7 @@ from rdkit.Chem import AllChem
 from mordred import Calculator, descriptors
 from mordred.error import Missing, Error
 
-# --- NumPy 2.x 兼容别名（某些库依赖旧名）
+
 if not hasattr(np, 'float'):  np.float  = float  # type: ignore
 if not hasattr(np, 'int'):    np.int    = int    # type: ignore
 if not hasattr(np, 'bool'):   np.bool   = bool   # type: ignore
@@ -65,7 +52,6 @@ def make_mol_from_smiles(smi: str, add_h=True, embed_3d=True):
 
 
 def build_descriptor_template(include_3d: bool):
-    """固定一次描述符集合与顺序，避免不同分子造成列不一致。"""
     calc = Calculator(descriptors, ignore_3D=(not include_3d))
     m = make_mol_from_smiles("C", add_h=True, embed_3d=include_3d)  # 甲烷
     res = calc(m)
@@ -110,20 +96,16 @@ def process_csv(in_csv: str, out_csv: str, include_3d: bool):
     df = pd.read_csv(in_csv)
 
     if df.shape[1] < 2:
-        raise ValueError(f"{in_csv}: 至少需要 2 列（第1列SMILES，第2列起为标签）。")
+        raise ValueError(f"{in_csv}: At least 2 columns are required (the first column is SMILES, and the second column onwards are labels).")
 
-    # 除了Lipophilicity
+
     smiles_col = df.columns[0]
     label_cols = list(df.columns[1:])
 
-    # Lipophilicity
-    # smiles_col = df.columns[2]
-    # label_cols = df.columns[1]
 
     print(f"  SMILES column: {smiles_col}")
     print(f"  Label columns: {label_cols}")
 
-    # 强制将标签转成数值类型；不可转的值置为 NaN 再填 0（给训练时自己决定是否过滤）
     labels_df = df[label_cols].apply(pd.to_numeric, errors="coerce").fillna(0.0)
 
     calc, desc_objs, desc_names = build_descriptor_template(include_3d=include_3d)
@@ -132,7 +114,7 @@ def process_csv(in_csv: str, out_csv: str, include_3d: bool):
 
     feats_df = pd.DataFrame(X, columns=desc_names).replace([np.inf, -np.inf], 0.0).fillna(0.0).astype(np.float32)
 
-    # 输出顺序：[labels ...] + [descriptors ...]，标签列加前缀避免重名
+
     out_df = pd.concat([labels_df.reset_index(drop=True), feats_df], axis=1)
     out_df.rename(columns={c: f"label__{c}" for c in label_cols}, inplace=True)
 
