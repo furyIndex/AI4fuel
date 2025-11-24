@@ -311,6 +311,7 @@ def main():
                 st15 = os.path.join(best_dir, 'stage15_fused_grouped.xlsx')
                 if os.path.exists(st15):
                     shutil.copy2(st15, os.path.join(fold_dir, 'stage15_fused_grouped.xlsx'))
+                    shutil.copy2(os.path.join(best_dir, 'stage15_fused_grouped_outer.xlsx'), os.path.join(fold_dir, 'stage15_fused_grouped_outer.xlsx'))
                 try:
                     sp_path = os.path.join(fold_dir, 'split.json')
                     with open(sp_path, 'r', encoding='utf-8') as fp:
