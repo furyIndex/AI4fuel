@@ -11,7 +11,7 @@ from sklearn.metrics import r2_score
 from sklearn.preprocessing import StandardScaler
 from model.embedding_net import EmbeddingMLP
 from model.transformerModel import SimpleTransformerRegressor
-from descriptors_group.getGCNDescriptors import (
+from descriptors_group.feature_fusion_util import (
     knn_train, l1_norm, norm_adj_train, knn_val, norm_adj_val
 )
 

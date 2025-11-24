@@ -29,7 +29,7 @@ from collections import Counter
 from sklearn.model_selection import StratifiedKFold, KFold
 
 from model.embedding_net import EmbeddingMLP, ContrastiveLoss, embedding_val_func
-from descriptors_group.getGCNDescriptors import knn_train, l1_norm, norm_adj_train, knn_val, norm_adj_val
+from descriptors_group.feature_fusion_util import knn_train, l1_norm, norm_adj_train, knn_val, norm_adj_val
 from model.transformerModel import SimpleTransformerRegressor
 
 

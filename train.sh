@@ -4,7 +4,7 @@ python ./train_kfold/train.py \
     --k 10 \
     --a 0.1 \
     --epochs_embed 200 \
-    --trials 5 \
+    --trials 2 \
     --epochs_tr 500 \
     --patience 50 \
     --bs_tr 512 \

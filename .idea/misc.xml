@@ -3,5 +3,5 @@
   <component name="Black">
     <option name="sdkName" value="Python 3.12 (test)" />
   </component>
-  <component name="ProjectRootManager" version="2" project-jdk-name="pytorch" project-jdk-type="Python SDK" />
+  <component name="ProjectRootManager" version="2" project-jdk-name="Remote Python 3.8.10 (sftp://Longh@121.48.161.79:22/data/home/Longh/.virtualenvs/ai4fuel/bin/python)" project-jdk-type="Python SDK" />
 </project>
